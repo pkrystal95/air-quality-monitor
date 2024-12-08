@@ -8,6 +8,7 @@ import {
 } from "@ant-design/icons";
 
 const { Sider } = Layout;
+
 function getItem(label, key, icon, children, disabled = false) {
   return {
     key,
@@ -30,10 +31,9 @@ function IconSider(props) {
 
   return (
     <Sider
-      // collapsible
       collapsed={collapsed}
-      // onCollapse={(value) => setCollapsed(value)}
       style={{
+        paddingInline: "16px",
         overflow: "auto",
         height: "100vh",
         position: "fixed",
@@ -46,6 +46,9 @@ function IconSider(props) {
         defaultSelectedKeys={["3"]}
         mode="inline"
         items={items}
+        style={{
+          fontSize: "16px", // Adjust font size of menu items
+        }}
       />
     </Sider>
   );

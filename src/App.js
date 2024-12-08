@@ -8,6 +8,7 @@ import IconSider from "./components/IconSider";
 import { Button, Space } from "antd";
 
 const App = () => {
+  const [isMobile, setIsMobile] = useState(true);
   // const [stationData, setStationData] = useState([]);
 
   // useEffect(() => {
@@ -27,39 +28,49 @@ const App = () => {
   // }, []);
   return (
     <div>
-      <IconSider />
-      <KakaoMap
-        stationData={[
-          {
-            dmX: "37.523286",
-            item: "SO2, CO, O3, NO2, PM10, PM2.5",
-            mangName: "도시대기",
-            year: "1997",
-            addr: "서울 양천구 중앙로52길 56 신정4동 문화센터",
-            stationName: "양천구",
-            dmY: "126.858689",
-            so2Grade: "1",
-            coFlag: null,
-            khaiValue: "45",
-            so2Value: "0.002", // 아황산
-            coValue: "0.2", // 일산화
-            pm10Flag: null,
-            pm10Value: "17", /// 미세
-            o3Grade: "1",
-            khaiGrade: "1",
-            no2Flag: null,
-            no2Grade: "1",
-            o3Flag: null,
-            so2Flag: null,
-            pm25Value: "17", // 초미세
-            dataTime: "2024-12-08 24:00",
-            coGrade: "1",
-            no2Value: "0.005", // 이산화
-            pm10Grade: "1",
-            o3Value: "0.027", // 오존
-          },
-        ]}
-      />
+      {!isMobile && <IconSider />}
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: isMobile ? 0 : "80px",
+          width: "100%",
+          height: "100vh",
+        }}
+      >
+        <KakaoMap
+          stationData={[
+            {
+              dmX: "37.523286",
+              item: "SO2, CO, O3, NO2, PM10, PM2.5",
+              mangName: "도시대기",
+              year: "1997",
+              addr: "서울 양천구 중앙로52길 56 신정4동 문화센터",
+              stationName: "양천구",
+              dmY: "126.858689",
+              so2Grade: "1",
+              coFlag: null,
+              khaiValue: "45",
+              so2Value: "0.002", // 아황산
+              coValue: "0.2", // 일산화
+              pm10Flag: null,
+              pm10Value: "17", /// 미세
+              o3Grade: "1",
+              khaiGrade: "1",
+              no2Flag: null,
+              no2Grade: "1",
+              o3Flag: null,
+              so2Flag: null,
+              pm25Value: "17", // 초미세
+              dataTime: "2024-12-08 24:00",
+              coGrade: "1",
+              no2Value: "0.005", // 이산화
+              pm10Grade: "1",
+              o3Value: "0.027", // 오존
+            },
+          ]}
+        />
+      </div>
 
       <div
         style={{
