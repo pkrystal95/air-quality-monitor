@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 
-const KakaoMap = () => {
+const KakaoMap = ({ stationData }) => {
   const mapContainer = useRef(null);
   const [location, setLocation] = useState(null);
-  const [scriptLoaded, setScriptLoaded] = useState(false); // 맵 스크립트 로드 상태
+  const [scriptLoaded, setScriptLoaded] = useState(false);
 
   useEffect(() => {
     // 카카오맵 API 로드
@@ -12,38 +12,93 @@ const KakaoMap = () => {
       script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.REACT_APP_KAKAO_APP_KEY}&autoload=false`;
       script.async = true;
       script.onload = () => {
-        setScriptLoaded(true); // 스크립트가 로드되면 상태 업데이트
+        setScriptLoaded(true);
       };
       document.head.appendChild(script);
     };
 
     loadKakaoMapScript();
-  }, []); // 빈 배열로 한번만 실행
+  }, []);
 
   useEffect(() => {
     if (scriptLoaded && location !== null) {
-      // 카카오맵 로드 후 위치가 설정되면 맵 초기화
+      // 카카오맵 로드 후 지도 초기화
       window.kakao.maps.load(() => {
         const container = mapContainer.current;
         const options = {
           center: new window.kakao.maps.LatLng(location.lat, location.lng), // 사용자 위치
-          level: 12, // 확대 수준
+          level: 7, // 기본 확대 수준
         };
 
         const map = new window.kakao.maps.Map(container, options);
 
-        // 마커 추가
-        const markerPosition = new window.kakao.maps.LatLng(
-          location.lat,
-          location.lng
-        );
-        const marker = new window.kakao.maps.Marker({
-          position: markerPosition,
+        // 사용자 위치 마커 추가
+        // const userMarkerPosition = new window.kakao.maps.LatLng(
+        //   location.lat,
+        //   location.lng
+        // );
+        // const userMarker = new window.kakao.maps.Marker({
+        //   position: userMarkerPosition,
+        // });
+        // userMarker.setMap(map);
+
+        console.log("stationData", stationData);
+
+        // 측정소 데이터 마커 추가
+        const markers = stationData.map((station) => {
+          const position = new window.kakao.maps.LatLng(
+            parseFloat(station.dmX),
+            parseFloat(station.dmY)
+          );
+          const marker = new window.kakao.maps.Marker({
+            position: position,
+          });
+
+          const infoWindowContent = `
+            <div style="padding:10px; font-size:12px;">
+              <h4>${station.stationName}</h4>
+              <p>주소: ${station.addr}</p>
+              <p>항목: ${station.item}</p>
+              <p>측정망: ${station.mangName}</p>
+              <p>설치년도: ${station.year}</p>
+            </div>
+          `;
+          const infowindow = new window.kakao.maps.InfoWindow({
+            content: infoWindowContent,
+          });
+
+          // 마커 클릭 시 정보창 열기
+          window.kakao.maps.event.addListener(marker, "click", () => {
+            infowindow.open(map, marker);
+          });
+
+          return marker;
         });
-        marker.setMap(map);
+
+        // 확대 레벨 변경 이벤트 등록
+        window.kakao.maps.event.addListener(map, "zoom_changed", () => {
+          const level = map.getLevel(); // 현재 확대 수준
+          markers.forEach((marker) => {
+            if (level <= 7) {
+              marker.setMap(map); // 확대 수준이 7 이하일 때 마커 표시
+            } else {
+              marker.setMap(null); // 확대 수준이 8 이상일 때 마커 숨김
+            }
+          });
+        });
+
+        // 초기 상태: 확대 레벨에 따른 마커 표시/숨김
+        const initialLevel = map.getLevel();
+        markers.forEach((marker) => {
+          if (initialLevel <= 7) {
+            marker.setMap(map);
+          } else {
+            marker.setMap(null);
+          }
+        });
       });
     }
-  }, [scriptLoaded, location]); // 스크립트 로드 후, 위치가 변경될 때만 실행
+  }, [scriptLoaded, location, stationData]);
 
   useEffect(() => {
     // 사용자 위치 가져오기
@@ -74,14 +129,14 @@ const KakaoMap = () => {
     };
 
     getUserLocation();
-  }, []); // 위치는 한 번만 가져오기
+  }, []);
 
   return (
     <div
       ref={mapContainer}
       style={{
         width: "100%",
-        height: "100vh", // 페이지 전체 크기
+        height: "100vh",
         position: "absolute",
         top: 0,
         left: 0,
